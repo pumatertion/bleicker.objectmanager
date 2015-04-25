@@ -21,11 +21,5 @@
 		"psr-4": {
 			"Tests\\Bleicker\\ObjectManager\\": "tests"
 		}
-	},
-	"repositories": [
-		{
-			"type": "git",
-			"url": "git@bitbucket.org:cbleicker/bleicker-exception.git"
-		}
-	]
+	}
 }

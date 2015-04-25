@@ -4,15 +4,21 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "bf248a81552d0a7e8b4b6ea481f30065",
+    "hash": "5279d115ecddfb148c4e9fd9b61bfa63",
     "packages": [
         {
             "name": "bleicker/exception",
             "version": "1.0.0",
             "source": {
                 "type": "git",
-                "url": "git@bitbucket.org:cbleicker/bleicker-exception.git",
-                "reference": "35cb95105fd045e5e9cc12bf52a06d874f82957b"
+                "url": "https://github.com/pumatertion/bleicker.exception.git",
+                "reference": "dbf4f68b35189b07eb8c546093015e28dccaaaee"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pumatertion/bleicker.exception/zipball/dbf4f68b35189b07eb8c546093015e28dccaaaee",
+                "reference": "dbf4f68b35189b07eb8c546093015e28dccaaaee",
+                "shasum": ""
             },
             "require-dev": {
                 "phpunit/phpunit": "*"
@@ -23,6 +29,7 @@
                     "Bleicker\\Exception\\": "src"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "authors": [
                 {
                     "name": "Carsten Bleicker",
