@@ -13,7 +13,7 @@ use Closure;
  */
 class ObjectManager implements ObjectManagerInterface {
 
-	public static $implementations = [], $singletons = [];
+	public static $singletons = [];
 
 	/**
 	 * @param $alias
@@ -56,26 +56,26 @@ class ObjectManager implements ObjectManagerInterface {
 	 * @return boolean
 	 */
 	public static function isRegistered($alias) {
-		return array_key_exists($alias, static::$implementations);
+		return Container::has($alias);
 	}
 
 	/**
 	 * @param string $alias
 	 * @param string $implementation
-	 * @return void
+	 * @return static
 	 */
 	public static function register($alias, $implementation) {
-		static::$implementations[$alias] = $implementation;
+		Container::add($alias, $implementation);
+		return new static;
 	}
 
 	/**
 	 * @param string $alias
-	 * @return void
+	 * @return static
 	 */
 	public static function unregister($alias) {
-		if (array_key_exists($alias, static::$implementations)) {
-			unset(static::$implementations[$alias]);
-		}
+		Container::remove($alias);
+		return new static;
 	}
 
 	/**
@@ -115,10 +115,7 @@ class ObjectManager implements ObjectManagerInterface {
 	 * @return mixed
 	 */
 	public static function getImplementation($alias) {
-		if (array_key_exists($alias, static::$implementations)) {
-			return static::$implementations[$alias];
-		}
-		return NULL;
+		return Container::get($alias);
 	}
 
 	/**
@@ -143,7 +140,7 @@ class ObjectManager implements ObjectManagerInterface {
 	 * @return void
 	 */
 	public static function prune() {
-		static::$implementations = [];
 		static::$singletons = [];
+		Container::prune();
 	}
 }
