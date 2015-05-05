@@ -24,7 +24,7 @@ class ObjectManager implements ObjectManagerInterface {
 	 */
 	public static function get($alias, $argument = NULL) {
 
-		$implementation = static::getImplementation($alias);
+		$implementation = static::getImplementation($alias) === NULL ? $alias : static::getImplementation($alias);
 
 		if ($argument !== NULL && is_object($implementation) && !($implementation instanceof Closure)) {
 			throw new ArgumentsGivenButImplementationIsAlreadyAnObjectException('Object already exists as implementation and can not have arguments', 1429683991);
@@ -45,10 +45,10 @@ class ObjectManager implements ObjectManagerInterface {
 
 		if ($argument !== NULL) {
 			$arguments = array_slice(func_get_args(), 1);
-			return static::getObjectWithContructorArguments($alias, $arguments);
+			return static::getObjectWithContructorArguments($implementation, $arguments);
 		}
 
-		return static::getObject($alias);
+		return static::getObject($implementation);
 	}
 
 	/**
