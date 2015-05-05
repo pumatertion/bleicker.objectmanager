@@ -14,6 +14,11 @@ use Tests\Bleicker\ObjectManager\UnitTestCase;
  */
 class ObjectManagerTest extends UnitTestCase {
 
+	protected function setUp() {
+		parent::setUp();
+		ObjectManager::prune();
+	}
+
 	protected function tearDown() {
 		parent::tearDown();
 		ObjectManager::prune();
@@ -34,6 +39,15 @@ class ObjectManagerTest extends UnitTestCase {
 	 */
 	public function getClassWithoutAnyContructorArgumentReturnsInstance() {
 		$object = ObjectManager::get(SimpleClass::class);
+		$this->assertInstanceOf(SimpleClass::class, $object);
+	}
+
+	/**
+	 * @test
+	 */
+	public function getClassIfRegisteredAsStringTest() {
+		ObjectManager::register('foo', SimpleClass::class);
+		$object = ObjectManager::get('foo');
 		$this->assertInstanceOf(SimpleClass::class, $object);
 	}
 
