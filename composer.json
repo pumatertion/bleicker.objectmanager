@@ -1,5 +1,6 @@
 {
 	"name": "bleicker/objectmanager",
+	"type": "library",
 	"require": {
 		"bleicker/exception": "~1.0",
 		"bleicker/container": "~1.0"
