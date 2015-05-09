@@ -5,10 +5,10 @@ namespace Bleicker\ObjectManager\Exception;
 use Bleicker\Exception\ThrowableException as Exception;
 
 /**
- * Class ArgumentsGivenButImplementationIsAlreadyAnObjectException
+ * Class NotInstantiableException
  *
  * @package Bleicker\ObjectManager\Exception
  */
-class ArgumentsGivenButImplementationIsAlreadyAnObjectException extends Exception {
+class NotInstantiableException extends Exception {
 
 }
