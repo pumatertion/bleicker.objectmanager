@@ -27,7 +27,7 @@ class ObjectManager extends AbstractContainer implements ObjectManagerInterface 
 		if (static::has($alias)) {
 			$arguments = func_get_args();
 			unset($arguments[1]);
-			return call_user_func_array(array(new static, 'getRegistered'), func_get_args());
+			return call_user_func_array(array(new static, 'getRegistered'), array_values($arguments));
 		}
 
 		if ($fallback !== NULL) {
@@ -36,7 +36,7 @@ class ObjectManager extends AbstractContainer implements ObjectManagerInterface 
 
 		$arguments = func_get_args();
 		unset($arguments[1]);
-		return call_user_func_array(array(new static, 'getInstance'), $arguments);
+		return call_user_func_array(array(new static, 'getInstance'), array_values($arguments));
 	}
 
 	/**
@@ -48,8 +48,8 @@ class ObjectManager extends AbstractContainer implements ObjectManagerInterface 
 	protected static function getFallback($alias, $fallback, $constructorArgument = NULL) {
 		static::add($alias, $fallback);
 		$arguments = func_get_args();
-		unset($arguments[1]);
-		return call_user_func_array(array(new static, 'get'), $arguments);
+		$arguments[1] = NULL;
+		return call_user_func_array(array(new static, 'get'), array_values($arguments));
 	}
 
 	/**

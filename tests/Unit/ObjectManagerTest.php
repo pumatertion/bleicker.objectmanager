@@ -69,6 +69,15 @@ class ObjectManagerTest extends UnitTestCase {
 	/**
 	 * @test
 	 */
+	public function unregisteredWithoutFallbackAndAliasIsClassReturnsInstanceTest() {
+		$object1 = ObjectManager::get(SimpleClassHavingConstructorArgument::class);
+		$object2 = ObjectManager::get(SimpleClassHavingConstructorArgument::class);
+		$this->assertEquals($object1, $object2);
+	}
+
+	/**
+	 * @test
+	 */
 	public function unregisteredWithoutFallbackAndAliasIsClassHavingConstructorArgumentsTest() {
 		/** @var SimpleClassHavingConstructorArgument $object */
 		$object = ObjectManager::get(SimpleClassHavingConstructorArgument::class, NULL, 'Hello world!');
@@ -92,6 +101,17 @@ class ObjectManagerTest extends UnitTestCase {
 		$object = ObjectManager::get(SimpleClass::class, SimpleClassHavingConstructorArgument::class, 'Hello world!');
 		$this->assertInstanceOf(SimpleClassHavingConstructorArgument::class, $object);
 		$this->assertEquals('Hello world!', $object->getTitle());
+	}
+
+	/**
+	 * @test
+	 */
+	public function unregisteredHavingFallbackWithConstructorArgumentSingletonTest() {
+		/** @var SimpleClassHavingConstructorArgument $object1 */
+		$object1 = ObjectManager::get(SimpleClass::class, SimpleClassHavingConstructorArgument::class, 'Hello world!');
+		/** @var SimpleClassHavingConstructorArgument $object2 */
+		$object2 = ObjectManager::get(SimpleClass::class, SimpleClassHavingConstructorArgument::class, 'Hello world!');
+		$this->assertEquals($object1, $object2);
 	}
 
 	/**
@@ -121,6 +141,65 @@ class ObjectManagerTest extends UnitTestCase {
 		$instance1 = ObjectManager::get(SimpleClass::class);
 		$instance2 = ObjectManager::get(SimpleClass::class);
 		$this->assertEquals($object, $instance1);
+		$this->assertEquals($instance1, $instance2);
+	}
+
+	/**
+	 * @test
+	 */
+	public function registeredTest(){
+		ObjectManager::add('foo', SimpleClass::class);
+		$this->assertInstanceOf(SimpleClass::class, ObjectManager::get('foo'));
+	}
+
+	/**
+	 * @test
+	 */
+	public function registeredClassHavingConstructorArgumentsTest(){
+		ObjectManager::add('foo', SimpleClassHavingConstructorArgument::class);
+		/** @var SimpleClassHavingConstructorArgument $object */
+		$object = ObjectManager::get('foo', NULL, 'Hello world!');
+		$this->assertInstanceOf(SimpleClassHavingConstructorArgument::class, $object);
+		$this->assertEquals('Hello world!', $object->getTitle());
+	}
+
+	/**
+	 * @test
+	 */
+	public function registeredClassHavingConstructorArgumentsSkipsFallbackTest(){
+		ObjectManager::add('foo', SimpleClassHavingConstructorArgument::class);
+		/** @var SimpleClassHavingConstructorArgument $object */
+		$object = ObjectManager::get('foo', SimpleClass::class, 'Hello world!');
+		$this->assertInstanceOf(SimpleClassHavingConstructorArgument::class, $object);
+		$this->assertEquals('Hello world!', $object->getTitle());
+	}
+
+	/**
+	 * @test
+	 */
+	public function registeredClosureConstructorArgumentsTest(){
+		ObjectManager::add('foo', function($title){
+			$this->assertEquals('Hello world!', $title);
+			return new SimpleClassHavingConstructorArgument($title);
+		});
+		/** @var SimpleClassHavingConstructorArgument $object */
+		$object = ObjectManager::get('foo', NULL, 'Hello world!');
+		$this->assertInstanceOf(SimpleClassHavingConstructorArgument::class, $object);
+		$this->assertEquals('Hello world!', $object->getTitle());
+	}
+
+	/**
+	 * @test
+	 */
+	public function registeredHavingFallbackClosureConstructorArgumentAndResultsInSingletonTest() {
+		ObjectManager::add('foo', function($title){
+			$this->assertEquals('Hello world!', $title);
+			$object = new SimpleClassHavingConstructorArgument($title);
+			ObjectManager::add(SimpleClass::class, $object);
+			return $object;
+		});
+		$instance1 = ObjectManager::get('foo', NULL, 'Hello world!');
+		$instance2 = ObjectManager::get('foo', NULL, 'Hello world!');
 		$this->assertEquals($instance1, $instance2);
 	}
 }
