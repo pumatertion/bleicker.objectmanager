@@ -3,6 +3,7 @@
 namespace Bleicker\ObjectManager;
 
 use Bleicker\Container\AbstractContainer;
+use Bleicker\Container\Exception\AliasAlreadyExistsException;
 use Bleicker\ObjectManager\Exception\NotInstantiableException;
 use Closure;
 use ReflectionClass;
@@ -92,11 +93,16 @@ class ObjectManager extends AbstractContainer implements ObjectManagerInterface 
 	/**
 	 * @param string $alias
 	 * @param mixed $data
+	 * @param boolean $force
 	 * @return static
-	 * @api
+	 * @throws AliasAlreadyExistsException
 	 */
-	public static function add($alias, $data) {
-		return parent::add($alias, $data);
+	public static function add($alias, $data, $force = FALSE) {
+		if ($force === FALSE && static::has($alias)) {
+			throw new AliasAlreadyExistsException('The alias "' . $alias . '" already exists. If you want to overwrite it please do first: \\' . static::class . '::remove(\'' . $alias . '\');', 1431000561);
+		}
+		static::$storage[$alias] = $data;
+		return new static;
 	}
 
 	/**

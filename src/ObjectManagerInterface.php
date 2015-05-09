@@ -22,9 +22,10 @@ interface ObjectManagerInterface {
 	/**
 	 * @param string $alias
 	 * @param mixed $data
+	 * @param boolean $force
 	 * @return static
 	 */
-	public static function add($alias, $data);
+	public static function add($alias, $data, $force = FALSE);
 
 	/**
 	 * @return static

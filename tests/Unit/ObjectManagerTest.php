@@ -135,11 +135,11 @@ class ObjectManagerTest extends UnitTestCase {
 		$object = ObjectManager::get(SimpleClass::class, function($title){
 			$this->assertEquals('Hello world!', $title);
 			$object = new SimpleClassHavingConstructorArgument($title);
-			ObjectManager::add(SimpleClass::class, $object);
+			ObjectManager::add(SimpleClass::class, $object, TRUE);
 			return $object;
 		}, 'Hello world!');
-		$instance1 = ObjectManager::get(SimpleClass::class);
-		$instance2 = ObjectManager::get(SimpleClass::class);
+		$instance1 = ObjectManager::get(SimpleClass::class, NULL, 'Hello world!');
+		$instance2 = ObjectManager::get(SimpleClass::class, NULL, 'Hello world!');
 		$this->assertEquals($object, $instance1);
 		$this->assertEquals($instance1, $instance2);
 	}
@@ -195,7 +195,7 @@ class ObjectManagerTest extends UnitTestCase {
 		ObjectManager::add('foo', function($title){
 			$this->assertEquals('Hello world!', $title);
 			$object = new SimpleClassHavingConstructorArgument($title);
-			ObjectManager::add(SimpleClass::class, $object);
+			ObjectManager::add('foo', $object, TRUE);
 			return $object;
 		});
 		$instance1 = ObjectManager::get('foo', NULL, 'Hello world!');
