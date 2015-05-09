@@ -2,40 +2,67 @@
 
 namespace Bleicker\ObjectManager;
 
-use Bleicker\ObjectManager\Exception\ArgumentsGivenButImplementationIsAlreadyAnObjectException;
-use Bleicker\ObjectManager\Exception\ExistingClassOrInterfaceNameExpectedException;
+use Bleicker\Container\AbstractContainer;
+use Bleicker\ObjectManager\Exception\NotInstantiableException;
 use Closure;
+use ReflectionClass;
 
 /**
  * Class ObjectManager
  *
  * @package Bleicker\ObjectManager
  */
-class ObjectManager implements ObjectManagerInterface {
+class ObjectManager extends AbstractContainer implements ObjectManagerInterface {
 
-	public static $singletons = [];
+	public static $storage = [];
+
+	/**
+	 * @param string $alias
+	 * @param mixed $constructorArgument ...argument
+	 * @param mixed $fallback
+	 * @return object
+	 * @api
+	 */
+	public static function get($alias, $fallback = NULL, $constructorArgument = NULL) {
+		if (static::has($alias)) {
+			$arguments = func_get_args();
+			unset($arguments[1]);
+			return call_user_func_array(array(new static, 'getRegistered'), array_values($arguments));
+		}
+
+		if ($fallback !== NULL) {
+			return call_user_func_array(array(new static, 'getFallback'), func_get_args());
+		}
+
+		$arguments = func_get_args();
+		unset($arguments[1]);
+		return call_user_func_array(array(new static, 'getInstance'), array_values($arguments));
+	}
+
+	/**
+	 * @param string $alias
+	 * @param mixed $fallback
+	 * @param mixed $constructorArgument
+	 * @return object
+	 */
+	protected static function getFallback($alias, $fallback, $constructorArgument = NULL) {
+		static::add($alias, $fallback);
+		$arguments = func_get_args();
+		$arguments[1] = NULL;
+		return call_user_func_array(array(new static, 'get'), array_values($arguments));
+	}
 
 	/**
 	 * @param $alias
-	 * @param mixed $argument ...argument
+	 * @param mixed $constructorArgument
 	 * @return object
-	 * @throws ExistingClassOrInterfaceNameExpectedException
-	 * @throws ArgumentsGivenButImplementationIsAlreadyAnObjectException
 	 */
-	public static function get($alias, $argument = NULL) {
-
-		$implementation = static::getImplementation($alias) === NULL ? $alias : static::getImplementation($alias);
-
-		if ($argument !== NULL && is_object($implementation) && !($implementation instanceof Closure)) {
-			throw new ArgumentsGivenButImplementationIsAlreadyAnObjectException('Object already exists as implementation and can not have arguments', 1429683991);
-		}
+	protected static function getRegistered($alias, $constructorArgument = NULL) {
+		$implementation = parent::get($alias);
+		$constructorArguments = array_slice(func_get_args(), 1);
 
 		if ($implementation instanceof Closure) {
-			$arguments = array_slice(func_get_args(), 1);
-			$object = call_user_func_array($implementation, $arguments);
-			if (static::isSingleton($alias)) {
-				static::register($alias, $object);
-			}
+			$object = call_user_func_array($implementation, $constructorArguments);
 			return $object;
 		}
 
@@ -43,104 +70,66 @@ class ObjectManager implements ObjectManagerInterface {
 			return $implementation;
 		}
 
-		if ($argument !== NULL) {
-			$arguments = array_slice(func_get_args(), 1);
-			return static::getObjectWithContructorArguments($implementation, $arguments);
+		$classReflection = new ReflectionClass($implementation);
+		return $classReflection->newInstanceArgs($constructorArguments);
+	}
+
+	/**
+	 * @param $alias
+	 * @param mixed $constructorArgument
+	 * @return object
+	 * @throws NotInstantiableException
+	 */
+	protected static function getInstance($alias, $constructorArgument = NULL) {
+		$classReflection = new ReflectionClass($alias);
+		$constructorArguments = array_slice(func_get_args(), 1);
+		if (!$classReflection->isInstantiable()) {
+			throw new NotInstantiableException('Can not get instance of "' . $alias . '" ', 1431187178);
 		}
-
-		return static::getObject($implementation);
+		return $classReflection->newInstanceArgs($constructorArguments);
 	}
 
 	/**
 	 * @param string $alias
-	 * @return boolean
-	 */
-	public static function isRegistered($alias) {
-		return Container::has($alias);
-	}
-
-	/**
-	 * @param string $alias
-	 * @param string $implementation
+	 * @param mixed $data
 	 * @return static
+	 * @api
 	 */
-	public static function register($alias, $implementation) {
-		Container::add($alias, $implementation);
-		return new static;
+	public static function add($alias, $data) {
+		return parent::add($alias, $data);
 	}
 
 	/**
 	 * @param string $alias
 	 * @return static
+	 * @api
 	 */
-	public static function unregister($alias) {
-		Container::remove($alias);
-		return new static;
+	public static function remove($alias) {
+		return parent::remove($alias);
 	}
 
 	/**
 	 * @param string $alias
-	 * @return void
-	 */
-	public static function makeSingleton($alias) {
-		static::$singletons[$alias] = TRUE;
-	}
-
-	/**
-	 * @param string $alias
-	 * @return void
-	 */
-	public static function makePrototype($alias) {
-		unset(static::$singletons[$alias]);
-	}
-
-	/**
-	 * @param $alias
 	 * @return boolean
+	 * @api
 	 */
-	public static function isSingleton($alias) {
-		return array_key_exists($alias, static::$singletons) ? static::$singletons[$alias] : FALSE;
+	public static function has($alias) {
+		return parent::has($alias);
 	}
 
 	/**
-	 * @param $alias
-	 * @return boolean
-	 */
-	public static function isPrototype($alias) {
-		return !static::isSingleton($alias);
-	}
-
-	/**
-	 * @param $alias
-	 * @return mixed
-	 */
-	public static function getImplementation($alias) {
-		return Container::get($alias);
-	}
-
-	/**
-	 * @param string $className
-	 * @param array $arguments
-	 * @return object
-	 */
-	protected static function getObjectWithContructorArguments($className, array $arguments) {
-		$class = new \ReflectionClass($className);
-		return $class->newInstanceArgs($arguments);
-	}
-
-	/**
-	 * @param string $className
-	 * @return object
-	 */
-	protected static function getObject($className) {
-		return new $className();
-	}
-
-	/**
-	 * @return void
+	 * @return static
+	 * @api
 	 */
 	public static function prune() {
-		static::$singletons = [];
-		Container::prune();
+		return parent::prune();
+	}
+
+	/**
+	 * @return array
+	 * @api
+	 */
+	public static function storage() {
+		return parent::storage();
 	}
 }

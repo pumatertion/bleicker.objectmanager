@@ -2,64 +2,46 @@
 namespace Bleicker\ObjectManager;
 
 /**
- * Interface ObjectManager
+ * Class ObjectManager
  *
  * @package Bleicker\ObjectManager
  */
 interface ObjectManagerInterface {
 
 	/**
-	 * @param string $alias
-	 * @param $argument ...$argument
+	 * @return array
 	 */
-	public static function get($alias, $argument = NULL);
-
-	/**
-	 * @param string $alias
-	 * @param string $implementation
-	 * @return void
-	 */
-	public static function register($alias, $implementation);
-
-	/**
-	 * @param string $alias
-	 * @return void
-	 */
-	public static function unregister($alias);
-
-	/**
-	 * @param string $alias
-	 * @return void
-	 */
-	public static function makeSingleton($alias);
-
-	/**
-	 * @param string $alias
-	 * @return void
-	 */
-	public static function makePrototype($alias);
+	public static function storage();
 
 	/**
 	 * @param string $alias
 	 * @return boolean
 	 */
-	public static function isSingleton($alias);
+	public static function has($alias);
 
 	/**
 	 * @param string $alias
-	 * @return boolean
+	 * @param mixed $data
+	 * @return static
 	 */
-	public static function isPrototype($alias);
+	public static function add($alias, $data);
 
 	/**
-	 * @param string $alias
-	 * @return boolean
-	 */
-	public static function isRegistered($alias);
-
-	/**
-	 * @return void
+	 * @return static
 	 */
 	public static function prune();
 
+	/**
+	 * @param string $alias
+	 * @param mixed $constructorArgument ...argument
+	 * @param mixed $fallback
+	 * @return object
+	 */
+	public static function get($alias, $fallback = NULL, $constructorArgument = NULL);
+
+	/**
+	 * @param string $alias
+	 * @return static
+	 */
+	public static function remove($alias);
 }
