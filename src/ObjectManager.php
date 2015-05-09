@@ -21,6 +21,7 @@ class ObjectManager extends AbstractContainer implements ObjectManagerInterface 
 	 * @param mixed $constructorArgument ...argument
 	 * @param mixed $fallback
 	 * @return object
+	 * @api
 	 */
 	public static function get($alias, $fallback = NULL, $constructorArgument = NULL) {
 		if (static::has($alias)) {
@@ -86,5 +87,49 @@ class ObjectManager extends AbstractContainer implements ObjectManagerInterface 
 			throw new NotInstantiableException('Can not get instance of "' . $alias . '" ', 1431187178);
 		}
 		return $classReflection->newInstanceArgs($constructorArguments);
+	}
+
+	/**
+	 * @param string $alias
+	 * @param mixed $data
+	 * @return static
+	 * @api
+	 */
+	public static function add($alias, $data) {
+		return parent::add($alias, $data);
+	}
+
+	/**
+	 * @param string $alias
+	 * @return static
+	 * @api
+	 */
+	public static function remove($alias) {
+		return parent::remove($alias);
+	}
+
+	/**
+	 * @param string $alias
+	 * @return boolean
+	 * @api
+	 */
+	public static function has($alias) {
+		return parent::has($alias);
+	}
+
+	/**
+	 * @return static
+	 * @api
+	 */
+	public static function prune() {
+		return parent::prune();
+	}
+
+	/**
+	 * @return array
+	 * @api
+	 */
+	public static function storage() {
+		return parent::storage();
 	}
 }
