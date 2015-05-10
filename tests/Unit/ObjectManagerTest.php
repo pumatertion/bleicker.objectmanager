@@ -69,10 +69,10 @@ class ObjectManagerTest extends UnitTestCase {
 	/**
 	 * @test
 	 */
-	public function unregisteredWithoutFallbackAndAliasIsClassReturnsInstanceTest() {
+	public function unregisteredWithoutFallbackAndAliasIsClassReturnsPrototypeTest() {
 		$object1 = ObjectManager::get(SimpleClassHavingConstructorArgument::class);
 		$object2 = ObjectManager::get(SimpleClassHavingConstructorArgument::class);
-		$this->assertEquals($object1, $object2);
+		$this->assertFalse($object1 === $object2);
 	}
 
 	/**
@@ -106,12 +106,12 @@ class ObjectManagerTest extends UnitTestCase {
 	/**
 	 * @test
 	 */
-	public function unregisteredHavingFallbackWithConstructorArgumentSingletonTest() {
+	public function unregisteredHavingFallbackWithConstructorArgumentPrototypeTest() {
 		/** @var SimpleClassHavingConstructorArgument $object1 */
 		$object1 = ObjectManager::get(SimpleClass::class, SimpleClassHavingConstructorArgument::class, 'Hello world!');
 		/** @var SimpleClassHavingConstructorArgument $object2 */
 		$object2 = ObjectManager::get(SimpleClass::class, SimpleClassHavingConstructorArgument::class, 'Hello world!');
-		$this->assertEquals($object1, $object2);
+		$this->assertFalse($object1 === $object2);
 	}
 
 	/**
